@@ -1,0 +1,17 @@
+<!-- Cuando hay una excepcion -->
+@if(countryResource.error()){
+
+<not-found />
+
+}
+
+<!-- Mientras esta en isLoading  -->
+
+@if(countryResource.isLoading()){
+<h3 class="text-3xl">Cargando...</h3>
+}
+
+<!-- Cuando si tenemos un valor -->
+@if(countryResource.hasValue()){
+<country-information-page [country]="countryResource.value()!" />
+}

@@ -1,0 +1,14 @@
+<country-search-input
+  placeHolder="Buscar el país"
+  (value)="query.set($event)"
+/>
+
+<!-- si no se tiene un valor mandamos un arreglo vacio -->
+<!-- Pasando todos los atributos de manejo de estado de la carga y ligandolo a nuestro servicio para agarrar los valores -->
+
+<country-list
+  [countries]="countryResource.value() ?? []"
+  [errorMessage]="countryResource.error()"
+  [isEmpety]="countryResource.value()?.length === 0"
+  [isLoading]="countryResource.isLoading()"
+/>

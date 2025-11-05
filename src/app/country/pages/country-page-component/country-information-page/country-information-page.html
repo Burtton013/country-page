@@ -1,0 +1,36 @@
+<section>
+  <figure class="diff aspect-16/9" tabindex="0">
+    <div class="diff-item-1" role="img" tabindex="0">
+      <img [alt]="country().name" [src]="country().svg" />
+    </div>
+    <div class="diff-item-2" role="img">
+      <img
+        class="blur brightness-75"
+        [alt]="country().name"
+        [src]="country().svg"
+      />
+    </div>
+    <div class="diff-resizer"></div>
+  </figure>
+</section>
+
+<section class="flex flex-col items-center justify-center my-10">
+  <div class="stats shadow mx-5">
+    <div class="stat place-items-center">
+      <div class="stat-title">Población</div>
+      <div class="stat-value">{{country().population | number}}</div>
+      <div class="stat-desc">Desde {{currentYear()}}</div>
+    </div>
+
+    <div class="stat place-items-center">
+      <div class="stat-title">Nombre</div>
+      <div class="stat-value text-secondary">{{country().name}}</div>
+      <div class="stat-desc text-secondary">Región: {{country().region}}</div>
+    </div>
+
+    <div class="stat place-items-center">
+      <div class="stat-title">Sub región</div>
+      <div class="stat-value">{{country().subRegion}}</div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,11 @@
+<country-search-input
+  placeHolder="Buscar la capital"
+  (value)="query.set($event)"
+/>
+
+<country-list
+  [countries]="countryResource.value() ?? []"
+  [errorMessage]="countryResource.error()"
+  [isEmpety]="countryResource.value()?.length === 0"
+  [isLoading]="countryResource.isLoading()"
+/>
