@@ -1,6 +1,7 @@
 <country-search-input
   placeHolder="Buscar la capital"
   (value)="query.set($event)"
+  [debounceTimer]="200"
 />
 
 <country-list
