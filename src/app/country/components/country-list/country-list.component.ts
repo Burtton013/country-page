@@ -16,5 +16,5 @@ export class CountryListComponent {
   errorMessage = input<string | unknown | null>();
   // Valores booleanos
   isLoading = input<boolean>(false);
-  isEmpety = input<boolean>(false);
+  isEmpty = input<boolean>(false);
 }
