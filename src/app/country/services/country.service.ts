@@ -1,8 +1,8 @@
 import { HttpClient } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { RESTCountry } from '../interfaces/rest-countries.interface';
 import { CountryMapper } from '../mappers/country.mapper';
-import { catchError, map, Observable, of, throwError } from 'rxjs';
+import { catchError, map, Observable, of, tap, throwError } from 'rxjs';
 import { Country } from '../interfaces/country.interface';
 
 const API_URL = 'https://restcountries.com/v3.1';
@@ -14,14 +14,29 @@ export class CountryService {
   // Inyectando el servicio http desde angular core
   private http = inject(HttpClient);
 
+  //Creando un cache (propidad privada)
+  //Como no forma parte de un cambio en el doom no haremos uso de señales
+  //Haremos uso de un map
+
+  private queryCacheCapital = new Map<string, Country[]>(); //Esto es un objeto vacio, ya esta inicializado
+
   //Metodo para realizar el query por capital
   //Recuerda agregar que es de tipi Observable
+
   searchByCapital(query: string): Observable<Country[]> {
     query = query.toLowerCase();
+
+    //VERIFICACION DEL CACHE = Condicion en caso de que si exista algo dentro del cache
+    if (this.queryCacheCapital.has(query)) {
+      return of(this.queryCacheCapital.get(query) ?? []); //Hacemos nullish para que en caso de no existir retorno un arreglo vacio
+    }
 
     return this.http.get<RESTCountry[]>(`${API_URL}/capital/${query}`).pipe(
       //Operadores de rxjs para el observable
       map((resp) => CountryMapper.mapRestCountryArrayToCountryArray(resp)),
+      //Uso de efecto secundario de rxjs para almacenar el cache
+      tap((countries) => this.queryCacheCapital.set(query, countries)),
+
       catchError((error) => {
         console.log('Error fetching', error);
         return throwError(
@@ -51,7 +66,7 @@ export class CountryService {
 
   searchByCountry(query: string): Observable<Country[]> {
     query = query.toLowerCase();
-    console.log(query);
+
     return this.http.get<RESTCountry[]>(`${API_URL}/name/${query}`).pipe(
       map((resp) => CountryMapper.mapRestCountryArrayToCountryArray(resp)),
       catchError((error) => {
