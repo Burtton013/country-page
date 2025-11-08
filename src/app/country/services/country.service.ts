@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
 import { RESTCountry } from '../interfaces/rest-countries.interface';
 import { CountryMapper } from '../mappers/country.mapper';
-import { catchError, map, Observable, of, tap, throwError } from 'rxjs';
+import { catchError, delay, map, Observable, of, tap, throwError } from 'rxjs';
 import { Country } from '../interfaces/country.interface';
 
 const API_URL = 'https://restcountries.com/v3.1';
@@ -19,9 +19,10 @@ export class CountryService {
   //Haremos uso de un map
 
   private queryCacheCapital = new Map<string, Country[]>(); //Esto es un objeto vacio, ya esta inicializado
+  private queryCacheCountry = new Map<string, Country[]>();
 
   //Metodo para realizar el query por capital
-  //Recuerda agregar que es de tipi Observable
+  //Recuerda agregar que es de tipo Observable
 
   searchByCapital(query: string): Observable<Country[]> {
     query = query.toLowerCase();
@@ -56,7 +57,7 @@ export class CountryService {
       //Mapeamos lo anterior para que del arreglo resultado de la conversion anterior nos retorne unicamente el primer elementos
       map((countries) => countries.at(0)),
       catchError((error) => {
-        console.log('Error fetcing'), error;
+        console.log('Error fetching'), error;
         return throwError(
           () => new Error(`El pais con codigo: '${code}' no existe`)
         );
@@ -67,8 +68,15 @@ export class CountryService {
   searchByCountry(query: string): Observable<Country[]> {
     query = query.toLowerCase();
 
+    if (this.queryCacheCountry.has(query)) {
+      //Encadenando un pipe en un observable => ?? []).pipe(delay(2000)
+      return of(this.queryCacheCountry.get(query) ?? []);
+    }
+    console.log(`vengo del server ${query}`);
+
     return this.http.get<RESTCountry[]>(`${API_URL}/name/${query}`).pipe(
       map((resp) => CountryMapper.mapRestCountryArrayToCountryArray(resp)),
+      tap((countries) => this.queryCacheCountry.set(query, countries)),
       catchError((error) => {
         console.log('Error fetcing'), error;
         return throwError(() => new Error(`El pais '${query}' no existe`));
