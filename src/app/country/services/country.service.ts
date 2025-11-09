@@ -4,6 +4,7 @@ import { RESTCountry } from '../interfaces/rest-countries.interface';
 import { CountryMapper } from '../mappers/country.mapper';
 import { catchError, delay, map, Observable, of, tap, throwError } from 'rxjs';
 import { Country } from '../interfaces/country.interface';
+import { Region } from '../interfaces/region.type';
 
 const API_URL = 'https://restcountries.com/v3.1';
 
@@ -20,6 +21,7 @@ export class CountryService {
 
   private queryCacheCapital = new Map<string, Country[]>(); //Esto es un objeto vacio, ya esta inicializado
   private queryCacheCountry = new Map<string, Country[]>();
+  private queryCacheRegion = new Map<Region, Country[]>();
 
   //Metodo para realizar el query por capital
   //Recuerda agregar que es de tipo Observable
@@ -72,7 +74,6 @@ export class CountryService {
       //Encadenando un pipe en un observable => ?? []).pipe(delay(2000)
       return of(this.queryCacheCountry.get(query) ?? []);
     }
-    console.log(`vengo del server ${query}`);
 
     return this.http.get<RESTCountry[]>(`${API_URL}/name/${query}`).pipe(
       map((resp) => CountryMapper.mapRestCountryArrayToCountryArray(resp)),
@@ -80,6 +81,23 @@ export class CountryService {
       catchError((error) => {
         console.log('Error fetcing'), error;
         return throwError(() => new Error(`El pais '${query}' no existe`));
+      })
+    );
+  }
+
+  searchByRegion(region: Region) {
+    const url = `${API_URL}/region/${region}`;
+
+    if (this.queryCacheRegion.has(region)) {
+      return of(this.queryCacheRegion.get(region) ?? []);
+    }
+
+    return this.http.get<RESTCountry[]>(url).pipe(
+      map((resp) => CountryMapper.mapRestCountryArrayToCountryArray(resp)),
+      tap((countries) => this.queryCacheRegion.set(region, countries)),
+      catchError((error) => {
+        console.log('Error fetcing'), error;
+        return throwError(() => new Error(`La región no existe`));
       })
     );
   }
